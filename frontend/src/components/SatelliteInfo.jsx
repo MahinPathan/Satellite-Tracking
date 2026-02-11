@@ -1,20 +1,24 @@
 function SatelliteInfo({ data }) {
-  if (!data) return null;
+  if (!data || data.length === 0) return null;
 
   return (
-    <div style={{
-      marginTop: "20px",
-      padding: "15px",
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      maxWidth: "400px"
-    }}>
-      <h3>Satellite Details</h3>
-      <p><b>Latitude:</b> {data.latitude}</p>
-      <p><b>Longitude:</b> {data.longitude}</p>
-      <p><b>Altitude:</b> {data.altitude} km</p>
-      <p><b>Speed:</b> {data.speed ?? "N/A"} km/s</p>
-      <p><b>Last Update:</b> {new Date(data.timestamp * 1000).toLocaleString()}</p>
+    <div style={{ marginTop: "20px" }}>
+      <h3>Selected Satellites</h3>
+
+      {data.map((sat) => (
+        <div key={sat.norad_id} style={{
+          border: "1px solid #ccc",
+          padding: "10px",
+          marginBottom: "10px",
+          borderRadius: "6px"
+        }}>
+          <p><b>NORAD:</b> {sat.norad_id}</p>
+          <p><b>Latitude:</b> {sat.latitude}</p>
+          <p><b>Longitude:</b> {sat.longitude}</p>
+          <p><b>Altitude:</b> {sat.altitude} km</p>
+          <p><b>Speed:</b> {sat.speed ?? "N/A"}</p>
+        </div>
+      ))}
     </div>
   );
 }

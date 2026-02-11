@@ -1,41 +1,16 @@
-import { useEffect, useState } from "react";
-import { getSatellites, getLiveSatellite } from "./api";
-import SatelliteSelector from "./components/SatelliteSelector";
-import SatelliteInfo from "./components/SatelliteInfo";
-import MapView from "./components/MapView";
+import axios from "axios";
 
-function App() {
-  const [satellites, setSatellites] = useState([]);
-  const [liveData, setLiveData] = useState(null);
+const API = axios.create({
+  baseURL: "http://127.0.0.1:8000",
+  timeout: 20000, // ⬅ increase timeout (Skyfield calculation heavy ho sakta hai)
+});
 
-  useEffect(() => {
-    getSatellites().then(res => setSatellites(res.data));
-  }, []);
+// 📄 Get satellite list (TLE database)
+export const getSatellites = () => {
+  return API.get("/satellites");
+};
 
-  const handleSelect = (noradId) => {
-    if (!noradId) return;
-
-    getLiveSatellite({
-      norad_id: noradId,
-      lat: 21.1,
-      lng: 79.0,
-    }).then(res => setLiveData(res.data));
-  };
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Satellite Tracking Platform</h2>
-
-      <SatelliteSelector
-        satellites={satellites}
-        onSelect={handleSelect}
-      />
-
-      <SatelliteInfo data={liveData} />
-
-      <MapView data={liveData} />
-    </div>
-  );
-}
-
-export default App;
+// 🛰 Get ALL live satellites (Skyfield engine)
+export const getAllLiveSatellites = () => {
+  return API.get("/satellites/live-all");
+};

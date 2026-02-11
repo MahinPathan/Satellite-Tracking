@@ -4,10 +4,10 @@ import json
 
 from backend.services.celestrak_service import update_satellites
 from backend.services.n2yo_service import get_live_position
+import backend.services.orbit_service as orbit_service
 
 router = APIRouter()
 
-# backend/ ka base path
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 SAT_FILE = DATA_DIR / "satellites.json"
@@ -41,6 +41,11 @@ def satellite_live(norad_id: int, lat: float, lng: float):
         "latitude": pos.get("satlatitude"),
         "longitude": pos.get("satlongitude"),
         "altitude": pos.get("sataltitude"),
-        "speed": pos.get("satvelocity"),   # safe access ✅
+        "speed": pos.get("satvelocity"),
         "timestamp": pos.get("timestamp"),
     }
+
+
+@router.get("/satellites/live-all")
+def satellites_live_all():
+    return orbit_service.cached_positions
