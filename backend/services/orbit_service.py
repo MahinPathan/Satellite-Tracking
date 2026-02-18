@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import threading
 import time
+import math
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -15,9 +16,10 @@ cached_positions = []
 is_running = False
 
 
+# =====================================
+# 🔥 Calculate All Satellite Positions
+# =====================================
 def calculate_all_positions():
-    global cached_positions
-
     if not SAT_FILE.exists():
         return []
 
@@ -43,23 +45,31 @@ def calculate_all_positions():
             geocentric = satellite.at(t)
             subpoint = geocentric.subpoint()
 
+            lat = subpoint.latitude.degrees
+            lon = subpoint.longitude.degrees
+            alt = subpoint.elevation.km
+
+            # 🔥 Remove NaN values (VERY IMPORTANT)
+            if math.isnan(lat) or math.isnan(lon) or math.isnan(alt):
+                continue
+
             results.append({
                 "name": sat["name"],
                 "norad_id": sat["norad_id"],
-                "latitude": subpoint.latitude.degrees,
-                "longitude": subpoint.longitude.degrees,
-                "altitude": subpoint.elevation.km
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "altitude": float(alt)
             })
 
-        except Exception as e:
-         print("Error in satellite:", sat.get("name"))
-         print("Reason:", e)
-        continue
-
+        except Exception:
+            continue
 
     return results
 
 
+# =====================================
+# 🔥 Background Auto Updater
+# =====================================
 def background_updater():
     global cached_positions, is_running
 
@@ -70,6 +80,19 @@ def background_updater():
 
     while True:
         print("Updating satellite positions...")
-        cached_positions = calculate_all_positions()
-        print(f"Updated {len(cached_positions)} satellites")
+        try:
+            cached_positions = calculate_all_positions()
+            print(f"Updated {len(cached_positions)} satellites")
+        except Exception as e:
+            print("Background update error:", e)
+
         time.sleep(30)  # update every 30 sec
+
+
+# =====================================
+# 🔥 Start Thread Automatically
+# =====================================
+def start_background_updater():
+    thread = threading.Thread(target=background_updater)
+    thread.daemon = True
+    thread.start()

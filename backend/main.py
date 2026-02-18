@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.satellite_routes import router
 from backend.services.orbit_service import background_updater
+from backend.services.orbit_service import start_background_updater
+
 import threading
 
 app = FastAPI()
